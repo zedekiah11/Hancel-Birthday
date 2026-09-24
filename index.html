@@ -41,9 +41,22 @@
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg1)}
 body{
-  height:100%;margin:0;overflow:hidden;position:relative;touch-action:manipulation;
+  height:100%;margin:0;overflow:hidden;touch-action:manipulation;
   font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-weight:600;color:var(--ink);
   background:linear-gradient(165deg,var(--bg1),var(--bg2) 55%,var(--bg3));
+  display:flex;align-items:center;justify-content:center;
+}
+/* .frame holds the whole mobile experience. On phones it fills the screen edge to edge.
+   On tablets and desktops it becomes a centered, phone-shaped card so the layout never
+   stretches out of proportion; everything inside still behaves exactly like the phone view. */
+.frame{position:relative;width:100%;height:100dvh;overflow:hidden;background:transparent;transform:translateZ(0)}
+/* the transform above makes .frame the containing block for any position:fixed element
+   inside it (the mute button, the landing page, the lightbox), so on desktop they stay
+   inside the phone-shaped card instead of covering the whole browser window. */
+@media (min-width:641px){
+  body{padding:22px;box-sizing:border-box}
+  .frame{width:min(430px,100%);height:min(880px,94dvh);border-radius:34px;
+    box-shadow:0 46px 100px -34px rgba(120,20,80,.55),0 0 0 10px rgba(255,255,255,.55);}
 }
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 button:focus-visible{outline:3px solid var(--lilac);outline-offset:3px}
@@ -60,7 +73,7 @@ button:focus-visible{outline:3px solid var(--lilac);outline-offset:3px}
 .intro.gone{opacity:0;visibility:hidden;pointer-events:none}
 #balloons{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .balloon{
-  position:absolute;left:var(--x);top:var(--y);width:var(--w);height:calc(var(--w)*1.22);
+  position:absolute;left:var(--x);top:var(--y);width:var(--w);height:calc(var(--w)*1.22);will-change:transform;
   border-radius:50% 50% 48% 48% / 56% 56% 44% 44%;
   background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.9) 0 8%,transparent 9%),linear-gradient(160deg,var(--c1),var(--c2));
   box-shadow:inset -8px -10px 18px rgba(120,20,80,.12);
@@ -129,7 +142,7 @@ button:focus-visible{outline:3px solid var(--lilac);outline-offset:3px}
   text-shadow:0 0 30px rgba(255,111,165,.7),0 0 70px rgba(255,111,165,.4);animation:heartbeat 1.304s ease-in-out infinite;opacity:.9;pointer-events:none}
 @keyframes heartbeat{0%,100%{transform:translate(-50%,-50%) scale(1)}12%{transform:translate(-50%,-50%) scale(1.18)}28%{transform:translate(-50%,-50%) scale(1.04)}}
 
-.pol{position:absolute;left:50%;top:50%;width:var(--fw);padding:6px 6px 22px;background:var(--paper);border-radius:6px;opacity:0;will-change:transform,opacity;
+.pol{position:absolute;left:50%;top:50%;width:var(--fw);will-change:transform,opacity;padding:6px 6px 22px;background:var(--paper);border-radius:6px;opacity:0;will-change:transform,opacity;
   transform:translate3d(calc(-50% + var(--x)),calc(-50% + var(--y)),-950px) rotate(var(--r));
   box-shadow:0 10px 20px -8px rgba(140,30,90,.45)}
 .stage.on .pol{animation:fly var(--D) linear var(--dl) infinite}
@@ -175,6 +188,7 @@ body:not([data-phase="intro"]) #mute{display:grid}
 
 /* 3D gift box */
 .giftbox,.giftbox *{transform-style:preserve-3d}
+.rot{will-change:transform}
 .giftbox{position:relative;width:100%;height:100%}
 .jit{position:absolute;inset:0}
 .tilt{position:absolute;left:50%;top:50%;width:0;height:0;transform:translateY(calc(var(--s)*.16)) rotateX(-20deg)}
@@ -380,7 +394,7 @@ body[data-phase="final"] .stage,body[data-phase="final"] .gift-layer{visibility:
 .gtoast{position:absolute;left:50%;top:16%;z-index:3;transform:translateX(-50%);padding:8px 16px;border-radius:99px;background:#fff;color:var(--pink-deep);font-family:'Bagel Fat One','Nunito',sans-serif;font-size:18px;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 10px 20px -10px rgba(160,30,100,.6)}
 .gtoast.show{animation:toast 1.7s ease-out}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-10px)}}
-.gb{position:absolute;bottom:-100px;left:50%;padding:0;border:0;border-radius:50% 50% 48% 48%/56% 56% 44% 44%;cursor:pointer;
+.gb{position:absolute;bottom:-100px;left:50%;padding:0;border:0;border-radius:50% 50% 48% 48%/56% 56% 44% 44%;cursor:pointer;will-change:transform;
   background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.9) 0 8%,transparent 9%),linear-gradient(160deg,var(--c1),var(--c2));box-shadow:inset -6px -8px 14px rgba(120,20,80,.14);
   animation:gbUp var(--t) linear forwards}
 .gb::after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:8px;transform:translateX(-50%);background:var(--c2);clip-path:polygon(50% 0,100% 100%,0 100%)}
@@ -442,6 +456,7 @@ body[data-phase="final"] .stage,body[data-phase="final"] .gift-layer{visibility:
 </style>
 </head>
 <body data-phase="intro">
+<div class="frame" id="frame">
 
 <div class="bg"><i></i><i></i><i></i></div>
 
@@ -594,6 +609,8 @@ body[data-phase="final"] .stage,body[data-phase="final"] .gift-layer{visibility:
   <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
 </button>
 
+</div><!-- /.frame -->
+
 <canvas id="confetti"></canvas>
 
 <script>
@@ -720,6 +737,16 @@ const PRIZES = [
 const WINS = ['tees','cake'];
 
 /* ===================================================== */
+function syncFrameUnits(){
+  const f = document.getElementById('frame');
+  if(!f) return;
+  const r = f.getBoundingClientRect();
+  f.style.setProperty('--fvw', (r.width/100)+'px');
+  f.style.setProperty('--fvh', (r.height/100)+'px');
+}
+syncFrameUnits();
+window.addEventListener('resize', syncFrameUnits);
+window.addEventListener('orientationchange', syncFrameUnits);
 const $ = s => document.querySelector(s);
 const rand = (a,b) => a + Math.random()*(b-a);
 const pick = a => a[Math.floor(Math.random()*a.length)];
@@ -778,8 +805,8 @@ function pol(i,side,count){
   const D = 14, sgn = side === 'L' ? -1 : 1;
   const XS = [27,34,29,35,26,33], YS = [-34,14,-8,32,-20,6];
   const k = (i + (side === 'L' ? 0 : 2)) % YS.length;
-  el.style.setProperty('--x', (sgn*XS[k])+'vw');
-  el.style.setProperty('--y', (side === 'L' ? YS[k] : -YS[(k+2)%YS.length])+'vh');
+  el.style.setProperty('--x', 'calc('+(sgn*XS[k])+' * var(--fvw))');
+  el.style.setProperty('--y', 'calc('+(side === 'L' ? YS[k] : -YS[(k+2)%YS.length])+' * var(--fvh))');
   el.style.setProperty('--r', (sgn*(2+(k%3)*2.5))+'deg');
   el.style.setProperty('--D', D+'s');
   el.style.setProperty('--dl', (i*(D/count) + (side === 'R' ? D/count/2 : 0) - D*.55).toFixed(2)+'s');
@@ -797,10 +824,11 @@ function pol(i,side,count){
   }
   el.appendChild(ph); return el;
 }
-(function buildLanes(){
+const idle = window.requestIdleCallback || (fn => setTimeout(fn, 60));
+idle(() => {
   const lanes = $('#lanes'), count = 5;
   for (let i=0;i<count;i++){ lanes.appendChild(pol(i,'L',count)); lanes.appendChild(pol(i,'R',count)); }
-})();
+});
 for (let i=0;i<10;i++){
   const h = document.createElement('span'); h.textContent = pick(['\u{1F388}','\u{1F381}','\u{1F382}','\u2728','\u{1F496}','\u{1F380}','\u{1F370}','\u{1F338}']);
   h.style.cssText = `--x:${rand(2,95)}%;--s:${rand(16,28).toFixed(0)}px;--d:${rand(9,16).toFixed(1)}s;--dl:${rand(0,10).toFixed(1)}s`;
@@ -821,7 +849,7 @@ function ensureAudio(){
       master = ctx.createGain(); master.gain.value = muted ? 0 : .9;
       const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
       master.connect(comp); comp.connect(ctx.destination);
-      const conv = ctx.createConvolver(); conv.buffer = impulse(2.4,2.6);
+      const conv = ctx.createConvolver(); conv.buffer = impulse(1.1,2.6);
       const wet = ctx.createGain(); wet.gain.value = .3;
       conv.connect(wet); wet.connect(master); reverbIn = conv;
     }
@@ -829,8 +857,11 @@ function ensureAudio(){
   }catch(e){ ctx = null; }
 }
 function impulse(sec,decay){
-  const rate = ctx.sampleRate, len = Math.floor(rate*sec), b = ctx.createBuffer(2,len,rate);
-  for(let c=0;c<2;c++){ const d = b.getChannelData(c); for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/len,decay); }
+  const rate = ctx.sampleRate, len = Math.floor(rate*sec), b = ctx.createBuffer(1,len,rate);
+  const d = b.getChannelData(0);
+  const k = Math.pow(0.0008, 1/len); // cheap running decay, same curve shape without Math.pow per sample
+  let env = 1;
+  for(let i=0;i<len;i++){ d[i] = (Math.random()*2-1)*env; env *= k; }
   return b;
 }
 function newRun(){
@@ -854,7 +885,7 @@ function note(m,t,dur,vel){
   g.gain.linearRampToValueAtTime(vel,t+.008);
   g.gain.setTargetAtTime(0,t+.012,tau);
   g.connect(runGain);
-  [['triangle',1,1],['sine',2,.32],['sine',3,.1]].forEach(([type,mul,amp]) => {
+  [['triangle',1,1],['sine',2,.32]].forEach(([type,mul,amp]) => {
     const o = ctx.createOscillator(); o.type = type; o.frequency.value = f*mul;
     const og = ctx.createGain(); og.gain.value = amp;
     o.connect(og); og.connect(g);
@@ -997,7 +1028,7 @@ function rain(ms){
   const end = performance.now()+ms;
   const id = setInterval(() => {
     if(performance.now() > end){ clearInterval(id); return; }
-    for(let i=0;i<3;i++) P.push({x:rand(0,W),y:-12,vx:rand(-.6,.6),vy:rand(1.5,3.2),g:.02,rot:rand(0,6.28),vr:rand(-.15,.15),t:rand(0,6),
+    for(let i=0;i<2;i++) P.push({x:rand(0,W),y:-12,vx:rand(-.6,.6),vy:rand(1.5,3.2),g:.02,rot:rand(0,6.28),vr:rand(-.15,.15),t:rand(0,6),
       w:rand(7,12),h:rand(5,8),c:pick(COL),s:Math.floor(rand(0,3)),life:260});
     if(!running){ running = true; requestAnimationFrame(frame); }
   }, 70);
@@ -1283,11 +1314,13 @@ window.addEventListener('resize', resizeGame);
 /* ---- memories + lightbox ---- */
 const gal = $('#gal'), lb = $('#lb'), lbImg = $('#lbImg'), lbCount = $('#lbCount');
 let lbIdx = 0;
-PHOTOS.forEach((src,i) => {
-  const b = document.createElement('button'); b.className = 'pc'; b.style.setProperty('--r', ((i%5)-2)*1.7+'deg');
-  b.setAttribute('aria-label','Open photo '+(i+1));
-  const im = new Image(); im.src = src; im.alt = ''; im.draggable = false; b.appendChild(im);
-  b.addEventListener('click', () => openLb(i)); gal.appendChild(b);
+idle(() => {
+  PHOTOS.forEach((src,i) => {
+    const b = document.createElement('button'); b.className = 'pc'; b.style.setProperty('--r', ((i%5)-2)*1.7+'deg');
+    b.setAttribute('aria-label','Open photo '+(i+1));
+    const im = new Image(); im.loading = 'lazy'; im.decoding = 'async'; im.src = src; im.alt = ''; im.draggable = false; b.appendChild(im);
+    b.addEventListener('click', () => openLb(i)); gal.appendChild(b);
+  });
 });
 function showLb(){ lbImg.src = PHOTOS[lbIdx]; lbCount.textContent = (lbIdx+1)+' / '+PHOTOS.length; }
 function openLb(i){ lbIdx = i; showLb(); lb.classList.add('on'); lb.setAttribute('aria-hidden','false'); }
@@ -1373,7 +1406,7 @@ function openFinal(x,y){
   final.scrollTop = 0; final.classList.add('on'); final.setAttribute('aria-hidden','false');
   resizeGame();
   chime([84,88,91,96,100,103],.07,.05);
-  later(800, () => { burst(W/2, H*.35, 130, 13); rain(4200); });
+  later(800, () => { burst(W/2, H*.35, 90, 12); rain(2600); });
   clearInterval(gameTimer); gameTimer = setInterval(() => { if(gameOn) spawnBalloon(); }, 800);
   timers.push(gameTimer);
 }
